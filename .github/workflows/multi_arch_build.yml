@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        arch: [amd64, 386]
+        arch: [amd64]
 
     env:
       GOOS: windows
@@ -28,7 +28,7 @@ jobs:
       - name: Make Windows (${{ matrix.arch }}) Build
         run: go build -o .\dist\relatorioLegado
 
-      - name: Upload Artifact Windows x64
+      - name: Upload Artifact Windows (${{ matrix.arch }})
         uses:
           actions/upload-artifact@v4
         with:
