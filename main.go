@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"maps"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -26,7 +28,7 @@ var tableColumnsAndTypes = [][]string{
 	{"Qtd. Corte", "int"},
 	{"Data", "str"},
 	{"Hora", "str"},
-	{"Usuário", "str"},
+	{"Usuario", "str"},
 }
 
 func main() {
@@ -73,16 +75,23 @@ func main() {
 		time.Sleep(200 * time.Millisecond)
 	}
 
-	delete(table, "Usuário")
+	delete(table, "Usuario")
+	delete(table, "Data")
 
 	outFile := filepath.Join(outDir, fmt.Sprintf("relatorio_%s.xlsx", strDate))
 	if err := saveExcel(table, outFile); err != nil {
 		return
 	}
 
-	fmt.Printf("Relatório salvo em: %s\n", outFile)
-}
+	err = exec.Command("explorer", outDir).Run()
 
+	if errors.Is(err, &exec.ExitError{}) && err != nil {
+		dialog.Message("O processo foi finalizado, o relatório está neste caminho: %s", outDir).Title("Processo finalizado").Info()
+	} else {
+		fmt.Println(err)
+		return
+	}
+}
 
 // Verify if a page is the last page
 func isLastPage(pageLines []string) bool {
@@ -228,7 +237,7 @@ func saveExcel(table map[string][]string, outFile string) error {
 	headers := []string{}
 
 	for _, tct := range tableColumnsAndTypes {
-		if tct[0] == "Usuário" {
+		if tct[0] == "Usuario" || tct[0] == "Data" {
 			continue
 		}
 
