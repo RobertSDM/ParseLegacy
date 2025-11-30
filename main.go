@@ -13,6 +13,7 @@ import (
 	winkb "parseLegacy/windowsKeyboard"
 
 	"github.com/atotto/clipboard"
+	hook "github.com/robotn/gohook"
 	"github.com/sqweek/dialog"
 	"github.com/xuri/excelize/v2"
 )
@@ -32,18 +33,25 @@ var tableColumnsAndTypes = [][]string{
 }
 
 func main() {
+	isRunning := true
+	var table map[string][]string
+	strDate := time.Now().Format("02-01-2006")
+
 	outDir, err := dialog.Directory().Title("Local para salvar o relatório").Browse()
 	if err != nil {
-		return
+		panic(err)
 	}
-
-	strDate := time.Now().Format("02-01-2006")
 
 	time.Sleep(2 * time.Second)
 
-	var table map[string][]string
+	hook.Register(hook.KeyDown, []string{"esc"}, func(e hook.Event) {
+		isRunning = false
+		hook.End()
+	})
 
-	for {
+	hook.Process(hook.Start())
+
+	for isRunning {
 		page := getPage()
 
 		lines := strings.Split(page, "\n")
@@ -67,7 +75,8 @@ func main() {
 		}
 
 		if isLastPage(lines) {
-			break
+			isRunning = false
+			continue
 		}
 
 		// GO to the next page
@@ -85,9 +94,9 @@ func main() {
 
 	err = exec.Command("explorer", outDir).Run()
 
-	if errors.Is(err, &exec.ExitError{}) && err != nil {
+	if err != nil && errors.Is(err, &exec.ExitError{}) {
 		dialog.Message("O processo foi finalizado, o relatório está neste caminho: %s", outDir).Title("Processo finalizado").Info()
-	} else {
+	} else if err != nil {
 		fmt.Println(err)
 		return
 	}
