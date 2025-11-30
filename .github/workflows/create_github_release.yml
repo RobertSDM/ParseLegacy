@@ -1,0 +1,28 @@
+name: Create Github Release
+
+on:
+  push:
+    tags: "v*"
+
+jobs:
+  create-release:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+       arch: [x64, x86]
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create Release for Windows (${{ matrix.arch }})
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "WindowsBuild-${{ matrix.arch }}"
+          name: ParseLegacy ${{ github.ref_name }} for Windows ${{ matrix.arch }}
+          tag: ${{ github.ref_name }}
+        
