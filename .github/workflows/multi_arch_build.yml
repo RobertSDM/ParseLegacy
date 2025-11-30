@@ -31,7 +31,7 @@ jobs:
           go-version: '1.24'
 
       - name: Make Windows (${{ matrix.arch-name }}) Build
-        run: go build -o .\dist\relatorioLegado
+        run: go build -o .\dist\windowsBuild${{ matrix.arch-name }}.exe
 
       - name: Upload Artifact Windows (${{ matrix.arch-name }})
         uses:
