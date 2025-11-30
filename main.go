@@ -17,6 +17,8 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+var columnsToDrop = []string{"Usuario", "Data"}
+
 const columnLineNumber = 5
 
 var tableColumnsAndTypes = [][]string{
@@ -31,27 +33,34 @@ var tableColumnsAndTypes = [][]string{
 	{"Usuario", "str"},
 }
 
+var (
+	ErrInitApp   error = errors.New("erro ao iniciar o app")
+	ErrDirectory       = errors.New("você precisa selecionar uma pasta")
+	ErrSave            = errors.New("erro ao salvar")
+)
+
 func main() {
 	isRunning := true
 	var table map[string][]string
 	strDate := time.Now().Format("02-01-2006")
 
-	outDir, err := dialog.Directory().Title("Local para salvar o relatório").Browse()
-	if err != nil {
+	if err := winkb.ListenKeys([]string{"VK_ESCAPE"}, func(k string) {
+		isRunning = false
+	}); err != nil {
+		dialog.Message("%s", ErrInitApp).Title("Erro :(").Error()
 		panic(err)
 	}
 
-	if err = winkb.ListenKeys([]string{"VK_ESCAPE"}, func(k string) {
-		isRunning = false
-	}); err != nil {
-		fmt.Println(err)
+	outDir, err := dialog.Directory().Title("Local para salvar o relatório").Browse()
+	if err != nil {
+		dialog.Message("%s", ErrDirectory).Title("Erro :(").Error()
+		panic(err)
 	}
 
 	time.Sleep(2 * time.Second)
 
 	for isRunning {
 		page := getPage()
-
 		lines := strings.Split(page, "\n")
 
 		// Making sure the logic will work by cleaning and padding the lines
@@ -61,10 +70,10 @@ func main() {
 
 		tableRows := getTable(lines)
 
-		titlesLine := lines[columnLineNumber]
-		columnsPositions := columnsPosition(titlesLine)
+		columnTitleLine := lines[columnLineNumber]
+		columnTitlePositions := columnsPosition(columnTitleLine)
 
-		tb := parseTable(tableRows, columnsPositions)
+		tb := parseTable(tableRows, columnTitlePositions)
 
 		if table == nil {
 			table = tb
@@ -82,22 +91,24 @@ func main() {
 		time.Sleep(200 * time.Millisecond)
 	}
 
-	delete(table, "Usuario")
-	delete(table, "Data")
+	for _, col := range columnsToDrop {
+		delete(table, col)
+	}
 
 	outFile := filepath.Join(outDir, fmt.Sprintf("relatorio_%s.xlsx", strDate))
+
 	if err := saveExcel(table, outFile); err != nil {
 		return
 	}
 
-	err = exec.Command("explorer", outDir).Run()
+	exec.Command("explorer", outDir).Run()
 
-	if err != nil && errors.Is(err, &exec.ExitError{}) {
-		dialog.Message("O processo foi finalizado, o relatório está neste caminho: %s", outDir).Title("Processo finalizado").Info()
-	} else if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// if err != nil && errors.Is(err, &exec.ExitError{}) {
+	// 	dialog.Message("O processo foi finalizado, o relatório está neste caminho: %s", outDir).Title("Processo finalizado").Info()
+	// } else if err != nil {
+	// 	dialog.Message("%s o relatório", ErrSave).Title("Erro :(").Error()
+	// 	panic(err)
+	// }
 }
 
 // Verify if a page is the last page
@@ -244,7 +255,7 @@ func saveExcel(table map[string][]string, outFile string) error {
 	headers := []string{}
 
 	for _, tct := range tableColumnsAndTypes {
-		if tct[0] == "Usuario" || tct[0] == "Data" {
+		if slices.Contains(columnsToDrop, tct[0]) {
 			continue
 		}
 
