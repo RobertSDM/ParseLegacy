@@ -2,7 +2,6 @@ name: Multi Architecture Build and Release
 
 on:
   push:
-    branches: [main]
     tags: ["v*"]
 
 jobs:
@@ -59,6 +58,6 @@ jobs:
       - name: Create Release for Windows
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "artifact/WindowsBuild-*"
+          artifacts: "artifact/**/*"
           name: ParseLegacy ${{ github.ref_name }} for Windows
           tag: ${{ github.ref_name }}
