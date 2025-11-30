@@ -58,6 +58,6 @@ jobs:
       - name: Create Release for Windows
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "artifact/**/*"
+          artifacts: "artifact/**/*.exe"
           name: ParseLegacy ${{ github.ref_name }} for Windows
           tag: ${{ github.ref_name }}
