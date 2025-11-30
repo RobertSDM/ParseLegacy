@@ -42,14 +42,13 @@ func main() {
 		panic(err)
 	}
 
-	time.Sleep(2 * time.Second)
-
-	hook.Register(hook.KeyDown, []string{"esc"}, func(e hook.Event) {
+	if err = winkb.ListenKeys([]string{"VK_ESCAPE"}, func(k string) {
 		isRunning = false
-		hook.End()
-	})
+	}); err != nil {
+		fmt.Println(err)
+	}
 
-	hook.Process(hook.Start())
+	time.Sleep(2 * time.Second)
 
 	for isRunning {
 		page := getPage()
