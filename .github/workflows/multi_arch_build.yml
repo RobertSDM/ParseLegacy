@@ -2,7 +2,7 @@ name: Multi Architecture Build
 
 on:
   push:
-    branches: main
+    branches: [main]
   workflow_dispatch:
 
 jobs:

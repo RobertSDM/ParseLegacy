@@ -8,13 +8,14 @@ import (
 	"strings"
 	"time"
 
+	winkb "parseLegacy/windowsKeyboard"
+
 	"github.com/atotto/clipboard"
-	"github.com/go-vgo/robotgo"
 	"github.com/sqweek/dialog"
 	"github.com/xuri/excelize/v2"
 )
 
-const columnLinePosition = 5
+const columnLineNumber = 5
 
 var tableColumnsAndTypes = [][]string{
 	{"Loja", "str"},
@@ -40,29 +41,35 @@ func main() {
 
 	var table map[string][]string
 
-	for i := 0; i < 100; i++ {
+	for {
 		page := getPage()
 
 		lines := strings.Split(page, "\n")
+
 		// Making sure the logic will work by cleaning and padding the lines
 		for j := range lines {
 			lines[j] = " " + strings.ReplaceAll(lines[j], "\r", "") + " "
 		}
 
-		tableStr := getTable(lines)
+		tableRows := getTable(lines)
 
-		columnLine := lines[columnLinePosition]
-		positions := columnsPosition(columnLine)
+		titlesLine := lines[columnLineNumber]
+		columnsPositions := columnsPosition(titlesLine)
 
-		tb := parseCols(tableStr, positions)
+		tb := parseTable(tableRows, columnsPositions)
 
 		if table == nil {
 			table = tb
 		} else {
 			table = appendTables(table, tb)
 		}
-		// Go to the next page
-		robotgo.KeyTap("f8")
+
+		if isLastPage(lines) {
+			break
+		}
+
+		// GO to the next page
+		winkb.KeyPress(winkb.VK_F8)
 		time.Sleep(200 * time.Millisecond)
 	}
 
@@ -73,7 +80,13 @@ func main() {
 		return
 	}
 
-	// fmt.Printf("Relatório salvo em: %s\n", outFile)
+	fmt.Printf("Relatório salvo em: %s\n", outFile)
+}
+
+
+// Verify if a page is the last page
+func isLastPage(pageLines []string) bool {
+	return strings.Contains(pageLines[len(pageLines)-3], "ULTIMA PAGINA") || strings.Contains(pageLines[len(pageLines)-3], "ULTIMA PÁGINA")
 }
 
 // Append the second table to the first and return the first table
@@ -97,8 +110,12 @@ func appendTables(table1 map[string][]string, table2 map[string][]string) map[st
 
 // Return the legacy screen as text
 func getPage() string {
-	robotgo.KeyTap("a", "ctrl")
-	robotgo.KeyTap("c", "ctrl")
+	winkb.KeyHold(winkb.VK_CONTROL, func() {
+		winkb.KeyPress(winkb.VK_A)
+	})
+	winkb.KeyHold(winkb.VK_CONTROL, func() {
+		winkb.KeyPress(winkb.VK_C)
+	})
 
 	time.Sleep(100 * time.Millisecond)
 	text, _ := clipboard.ReadAll()
@@ -162,7 +179,7 @@ func columnsPosition(colLine string) map[string]int {
 }
 
 // Parse the columns values
-func parseCols(table []string, columnPositions map[string]int) map[string][]string {
+func parseTable(table []string, columnPositions map[string]int) map[string][]string {
 	cols := map[string][]string{}
 	for _, c := range tableColumnsAndTypes {
 		cols[c[0]] = []string{}
