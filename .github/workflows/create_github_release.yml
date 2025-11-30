@@ -19,10 +19,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - uses: actions/download-artifact@v5
+        with:
+          name: "WindowsBuild-${{ matrix.arch }}"
+          path: "artifact"
+
       - name: Create Release for Windows (${{ matrix.arch }})
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "WindowsBuild-${{ matrix.arch }}"
+          artifacts: "artifact/WindowsBuild-*"
           name: ParseLegacy ${{ github.ref_name }} for Windows ${{ matrix.arch }}
           tag: ${{ github.ref_name }}
         
