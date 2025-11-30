@@ -13,6 +13,7 @@ import (
 	winkb "parseLegacy/windowsKeyboard"
 
 	"github.com/atotto/clipboard"
+	hook "github.com/robotn/gohook"
 	"github.com/sqweek/dialog"
 	"github.com/xuri/excelize/v2"
 )
