@@ -16,7 +16,6 @@ require (
 	github.com/richardlehane/msoleps v1.0.4 // indirect
 	github.com/sqweek/dialog v0.0.0-20240226140203-065105509627
 	github.com/tiendc/go-deepcopy v1.7.1 // indirect
-	github.com/vcaesar/keycode v0.10.1 // indirect
 	github.com/xuri/efp v0.0.1 // indirect
 	github.com/xuri/nfp v0.0.2-0.20250530014748-2ddeb826f9a9 // indirect
 	golang.org/x/crypto v0.43.0 // indirect
