@@ -3,13 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"maps"
 	"os/exec"
 	"path/filepath"
-	"slices"
 	"strings"
 	"time"
 
+	"parseLegacy/utils"
 	winkb "parseLegacy/windowsKeyboard"
 
 	"github.com/atotto/clipboard"
@@ -125,7 +124,7 @@ func appendTables(table1 map[string][]string, table2 map[string][]string) map[st
 	}
 
 	rowi := 0
-	for rowi < len(slices.Collect(maps.Values(table2))[0]) {
+	for rowi < len(utils.MapValues(table2)[0]) {
 		for _, h := range headers {
 			table1[h] = append(table1[h], table2[h][rowi])
 		}
@@ -255,7 +254,7 @@ func saveExcel(table map[string][]string, outFile string) error {
 	headers := []string{}
 
 	for _, tct := range tableColumnsAndTypes {
-		if slices.Contains(columnsToDrop, tct[0]) {
+		if utils.Contains(columnsToDrop, tct[0]) {
 			continue
 		}
 
@@ -268,7 +267,7 @@ func saveExcel(table map[string][]string, outFile string) error {
 	}
 
 	rowi := 0
-	for rowi < len(slices.Collect(maps.Values(table))[0]) {
+	for rowi < len(utils.MapValues(table)[0]) {
 		for j, h := range headers {
 			cell, _ := excelize.CoordinatesToCellName(j+1, rowi+2)
 			f.SetCellValue(sheet, cell, table[h][rowi])

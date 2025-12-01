@@ -3,7 +3,8 @@ package windowskeyboard
 import (
 	"os"
 	"os/signal"
-	"slices"
+
+	"parseLegacy/utils"
 
 	"github.com/moutend/go-hook/pkg/keyboard"
 	"github.com/moutend/go-hook/pkg/types"
@@ -26,7 +27,7 @@ func ListenKeys(keys []string, cb func(k string)) (err error) {
 		for {
 			select {
 			case k := <-lowLevelKeychan:
-				if k.Message.String() == "WM_KEYDOWN" && slices.Contains(keys, k.VKCode.String()) {
+				if k.Message.String() == "WM_KEYDOWN" && utils.Contains(keys, k.VKCode.String()) {
 					cb(k.VKCode.String())
 				}
 
