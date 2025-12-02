@@ -165,8 +165,8 @@ func getTable(lines []string) []string {
 		return nil
 	}
 
-	for i := tableStart; i < len(lines); i++ {
-		if strings.TrimSpace(lines[i][:20]) == "" {
+	for i, line := range lines {
+		if strings.Contains(line, "TOTAL") {
 			tableEnd = i
 			break
 		}
