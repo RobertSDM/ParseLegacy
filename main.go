@@ -165,9 +165,13 @@ func getTable(lines []string) []string {
 		return nil
 	}
 
-	for i, line := range lines {
-		if strings.Contains(line, "TOTAL") {
-			tableEnd = i
+	for _, l := range lines[tableStart:]{
+		fmt.Println(l)
+	}
+	
+	for i, line := range lines[tableStart:] {
+		if strings.Contains(line, "TOTAL=>") || strings.Count(line, " ") == len(line) {
+			tableEnd = tableStart + i
 			break
 		}
 	}
