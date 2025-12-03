@@ -20,16 +20,16 @@ var columnsToDrop = []string{"Usuario", "Data"}
 
 const columnLineNumber = 5
 
-var tableColumnsAndTypes = [][]string{
-	{"Loja", "str"},
-	{"Fabr", "str"},
-	{"Prod", "int"},
-	{"Qtd. Pedida", "int"},
-	{"Qtd. Receb.", "int"},
-	{"Qtd. Corte", "int"},
-	{"Data", "str"},
-	{"Hora", "str"},
-	{"Usuario", "str"},
+var legacyTableAndAlignment = [][]string{
+	{"Loja", "left"},
+	{"Fabr", "left"},
+	{"Prod", "right"},
+	{"Qtd. Pedida", "right"},
+	{"Qtd. Receb.", "right"},
+	{"Qtd. Corte", "right"},
+	{"Data", "left"},
+	{"Hora", "left"},
+	{"Usuario", "left"},
 }
 
 var (
@@ -69,10 +69,10 @@ func main() {
 
 		tableRows := getTable(lines)
 
-		columnTitleLine := lines[columnLineNumber]
-		columnTitlePositions := columnsPosition(columnTitleLine)
+		columnsNamesLine := lines[columnLineNumber]
+		columsNamesPositions := columnsPosition(columnsNamesLine)
 
-		tb := parseTable(tableRows, columnTitlePositions)
+		tb := parseTable(tableRows, columsNamesPositions)
 
 		if table == nil {
 			table = tb
@@ -119,7 +119,7 @@ func isLastPage(pageLines []string) bool {
 func appendTables(table1 map[string][]string, table2 map[string][]string) map[string][]string {
 	headers := []string{}
 
-	for _, tct := range tableColumnsAndTypes {
+	for _, tct := range legacyTableAndAlignment {
 		headers = append(headers, tct[0])
 	}
 
@@ -165,10 +165,6 @@ func getTable(lines []string) []string {
 		return nil
 	}
 
-	for _, l := range lines[tableStart:]{
-		fmt.Println(l)
-	}
-	
 	for i, line := range lines[tableStart:] {
 		if strings.Contains(line, "TOTAL=>") || strings.Count(line, " ") == len(line) {
 			tableEnd = tableStart + i
@@ -188,8 +184,8 @@ func columnsPosition(colLine string) map[string]int {
 	for i, ch := range colLine {
 		if ch == ' ' {
 			if col {
-				if tableColumnsAndTypes[coli][1] == "int" {
-					positions[tableColumnsAndTypes[coli][0]] = i
+				if legacyTableAndAlignment[coli][1] == "right" {
+					positions[legacyTableAndAlignment[coli][0]] = i
 				}
 				coli++
 			}
@@ -198,8 +194,8 @@ func columnsPosition(colLine string) map[string]int {
 		}
 
 		if !col {
-			if tableColumnsAndTypes[coli][1] == "str" {
-				positions[tableColumnsAndTypes[coli][0]] = i
+			if legacyTableAndAlignment[coli][1] == "left" {
+				positions[legacyTableAndAlignment[coli][0]] = i
 			}
 		}
 		col = true
@@ -211,7 +207,7 @@ func columnsPosition(colLine string) map[string]int {
 // Parse the columns values
 func parseTable(table []string, columnPositions map[string]int) map[string][]string {
 	cols := map[string][]string{}
-	for _, c := range tableColumnsAndTypes {
+	for _, c := range legacyTableAndAlignment {
 		cols[c[0]] = []string{}
 	}
 
@@ -222,15 +218,15 @@ func parseTable(table []string, columnPositions map[string]int) map[string][]str
 			cl := row[i]
 			if cl == ' ' {
 				if tmp != "" {
-					name := tableColumnsAndTypes[gi][0]
+					name := legacyTableAndAlignment[gi][0]
 					cols[name] = append(cols[name], tmp)
 					tmp = ""
 					gi++
 				} else {
-					if gi < len(tableColumnsAndTypes) {
-						typ := tableColumnsAndTypes[gi][1]
-						name := tableColumnsAndTypes[gi][0]
-						if typ == "int" {
+					if gi < len(legacyTableAndAlignment) {
+						typ := legacyTableAndAlignment[gi][1]
+						name := legacyTableAndAlignment[gi][0]
+						if typ == "right" {
 							if pos, ok := columnPositions[name]; ok {
 								if i >= pos {
 									cols[name] = append(cols[name], "-")
@@ -250,19 +246,19 @@ func parseTable(table []string, columnPositions map[string]int) map[string][]str
 }
 
 // Save a table as a .xlsx
-func saveExcel(table map[string][]string, outFile string) error {
+func saveExcel(table map[string][]string, savePath string) error {
 	f := excelize.NewFile()
 	sheet := "Relatório"
 	f.SetSheetName("Sheet1", sheet)
 
 	headers := []string{}
 
-	for _, tct := range tableColumnsAndTypes {
-		if utils.Contains(columnsToDrop, tct[0]) {
+	for k := range table {
+		if utils.SliceContains(columnsToDrop, k) {
 			continue
 		}
 
-		headers = append(headers, tct[0])
+		headers = append(headers, k)
 	}
 
 	for i, h := range headers {
@@ -279,7 +275,7 @@ func saveExcel(table map[string][]string, outFile string) error {
 		rowi++
 	}
 
-	if err := f.SaveAs(outFile); err != nil {
+	if err := f.SaveAs(savePath); err != nil {
 		return err
 	}
 	return nil
