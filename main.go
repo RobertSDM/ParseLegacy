@@ -62,6 +62,11 @@ func main() {
 		page := getPage()
 		lines := strings.Split(page, "\n")
 
+		if isLastPage(lines) {
+			isRunning = false
+			continue
+		}
+
 		// Making sure the logic will work by cleaning and padding the lines
 		for j := range lines {
 			lines[j] = " " + strings.ReplaceAll(lines[j], "\r", "") + " "
@@ -78,11 +83,6 @@ func main() {
 			table = tb
 		} else {
 			table = appendTables(table, tb)
-		}
-
-		if isLastPage(lines) {
-			isRunning = false
-			continue
 		}
 
 		// GO to the next page
@@ -112,7 +112,7 @@ func main() {
 
 // Verify if a page is the last page
 func isLastPage(pageLines []string) bool {
-	return strings.Contains(pageLines[len(pageLines)-3], "ULTIMA PAGINA") || strings.Contains(pageLines[len(pageLines)-3], "ULTIMA PÁGINA")
+	return strings.Contains(pageLines[len(pageLines)-3], "ULTIMA TELA")
 }
 
 // Append the second table to the first and return the first table
