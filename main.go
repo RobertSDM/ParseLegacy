@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,10 +23,10 @@ const columnLineNumber = 5
 
 var legacyTableAndAlignment = [][]string{
 	{"Loja", "left"},
-	{"Fabr", "left"},
-	{"Prod", "right"},
+	{"Fabricante", "left"},
+	{"Produto", "right"},
 	{"Qtd. Pedida", "right"},
-	{"Qtd. Receb.", "right"},
+	{"Qtd. Recebimento", "right"},
 	{"Qtd. Corte", "right"},
 	{"Data", "left"},
 	{"Hora", "left"},
@@ -245,11 +246,72 @@ func parseTable(table []string, columnPositions map[string]int) map[string][]str
 	return cols
 }
 
+// Group all rows with the same value in the specified columnsToHash param.
+// The group behaviour is to sum the values.
+//
+// The returned table will contain only the columns in the columnsToHash and columnsToGroup. The others will be ignored.
+func groupby(table map[string][]string, columnsToHash []string, columnsToGroup []string) map[string][]string {
+	groupedTable := make(map[string]map[string]string)
+
+	tableSize := len(utils.MapValues(table)[0])
+
+	for row := 0; row < tableSize; row++ {
+		rowLine := make(map[string]string)
+
+		for k, v := range table {
+
+			if !utils.SliceContains(columnsToGroup, k) && !utils.SliceContains(columnsToHash, k) {
+				continue
+			}
+
+			rowLine[k] = v[row]
+		}
+
+		hashValues := []string{}
+
+		for _, c := range columnsToHash {
+			hashValues = append(hashValues, rowLine[c])
+		}
+
+		hash := strings.Join(hashValues, "\\")
+
+		rowLineGrouped, ok := groupedTable[hash]
+
+		if !ok {
+			groupedTable[hash] = rowLine
+			continue
+		}
+
+		for _, c := range columnsToGroup {
+
+			// Just skip when both are "-" to avoid changing the column value to 0
+			if rowLine[c] == "-" && rowLineGrouped[c] == "-" {
+				continue
+			}
+
+			rowLineV, _ := strconv.ParseInt(rowLine[c], 10, 64)
+			gTV, _ := strconv.ParseInt(rowLineGrouped[c], 10, 64)
+
+			rowLineGrouped[c] = fmt.Sprint(rowLineV + gTV)
+		}
+	}
+
+	finalTable := make(map[string][]string, len(groupedTable))
+
+	for _, t := range groupedTable {
+		for k, v := range t {
+			finalTable[k] = append(finalTable[k], v)
+		}
+	}
+
+	return finalTable
+}
+
 // Save a table as a .xlsx
 func saveExcel(table map[string][]string, savePath string) error {
 	f := excelize.NewFile()
-	sheet := "Relatório"
-	f.SetSheetName("Sheet1", sheet)
+	mainSheet := "Relatório Principal"
+	f.SetSheetName("Sheet1", mainSheet)
 
 	headers := []string{}
 
@@ -263,17 +325,56 @@ func saveExcel(table map[string][]string, savePath string) error {
 
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
-		f.SetCellValue(sheet, cell, h)
+		f.SetCellValue(mainSheet, cell, h)
 	}
 
 	rowi := 0
 	for rowi < len(utils.MapValues(table)[0]) {
 		for j, h := range headers {
 			cell, _ := excelize.CoordinatesToCellName(j+1, rowi+2)
-			f.SetCellValue(sheet, cell, table[h][rowi])
+			f.SetCellValue(mainSheet, cell, table[h][rowi])
 		}
 		rowi++
 	}
+
+	/// TODO: Rewrite saveExcel
+
+	/// Grouping by Loja and Produto
+
+	groupedTable := groupby(table, []string{"Loja", "Produto"}, []string{
+		"Qtd. Pedida",
+		"Qtd. Recebimento",
+		"Qtd. Corte",
+	})
+
+	groupbySheet := "Por Loja e Produto"
+	f.NewSheet(groupbySheet)
+
+	headers = []string{}
+
+	for k := range groupedTable {
+		if utils.SliceContains(columnsToDrop, k) {
+			continue
+		}
+
+		headers = append(headers, k)
+	}
+
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(groupbySheet, cell, h)
+	}
+
+	rowi = 0
+	for rowi < len(utils.MapValues(groupedTable)[0]) {
+		for j, h := range headers {
+			cell, _ := excelize.CoordinatesToCellName(j+1, rowi+2)
+			f.SetCellValue(groupbySheet, cell, groupedTable[h][rowi])
+		}
+		rowi++
+	}
+
+	//
 
 	if err := f.SaveAs(savePath); err != nil {
 		return err
