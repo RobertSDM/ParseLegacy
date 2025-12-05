@@ -88,7 +88,7 @@ func main() {
 
 		// GO to the next page
 		winkb.KeyPress(winkb.VK_F8)
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	for _, col := range columnsToDrop {
