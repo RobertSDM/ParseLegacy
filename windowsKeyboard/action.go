@@ -15,8 +15,9 @@ const (
 const (
 	VK_A       = 0x41
 	VK_C       = 0x43
-	VK_CONTROL = 0x11
+	VK_CONTROL = 0x11 // CTRL
 	VK_F8      = 0x77
+	VK_ESCAPE  = 0x1B // ESC
 )
 
 // Represent the keyboard input send to the Windows API
@@ -70,7 +71,7 @@ func KeyPress(key uint16) (err error) {
 	inputs := []INPUT{
 		{
 			Type: KEYBOARD_INPUT_TYPE,
-			Ki: KEYBDINPUT{
+			Ki: KEYBDINPUT{ // without dwFlags correspond to the down event
 				WVk: key,
 			},
 		},

@@ -1,4 +1,4 @@
-package main
+package parseLegacy
 
 var _ = []string{
 	`                               * * *   S I S T E M A  L E G A D O   * * *                                                       
