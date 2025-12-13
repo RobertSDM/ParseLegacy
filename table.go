@@ -1,7 +1,6 @@
 package parseLegacy
 
 import (
-	"errors"
 	"fmt"
 
 	"parseLegacy/utils"
@@ -45,7 +44,7 @@ func (t *Table) Shape() string {
 	return fmt.Sprintf("%dx%d", t.Width, t.Height)
 }
 
-// Save the table in excel format
+// Save the table in excel format. Be known that any file with the same name will be overwritten
 func (t *Table) ToExcel(savePath string, sheetName string) error {
 	f := excelize.NewFile()
 	f.SetSheetName("Sheet1", sheetName)
@@ -70,9 +69,15 @@ func (t *Table) ToExcel(savePath string, sheetName string) error {
 }
 
 // Append a row to the table's end
-func (t *Table) AddRow(row Row) {
+func (t *Table) AddRow(row Row) error {
+	if len(row) == 0 {
+		return ErrEmptyRow
+	}
+
 	t.Rows = append(t.Rows, row)
 	t.Height++
+
+	return nil
 }
 
 // Append a new column to headers attribute and all rows
@@ -88,11 +93,9 @@ func (t *Table) AddColumn(header string) {
 func (t *Table) Drop(headers []string) error {
 	for _, h := range headers {
 		if !utils.SliceContains(t.Headers, h) {
-			return fmt.Errorf(ErrNotFound, h)
+			return fmt.Errorf("the column \"%s\" was not found", h)
 		}
 	}
-
-	t.Width -= len(headers)
 
 	for _, h := range headers {
 		for _, row := range t.Rows {
@@ -110,19 +113,28 @@ func (t *Table) Drop(headers []string) error {
 	}
 
 	t.Headers = newHeaders
+	t.Width = len(t.Headers)
 
 	return nil
 }
 
 // Append all the rows from the table
 func (t *Table) ConcatTable(table *Table) error {
+	if table == t {
+		return ErrSameTableConcat
+	}
+
+	if table.Height == 0 {
+		return ErrEmptyTable
+	}
+
 	if t.Width != table.Width {
-		return errors.New(ErrTableShape)
+		return ErrTableShape
 	}
 
 	for i, h := range t.Headers {
 		if table.Headers[i] != h {
-			return errors.New(ErrTableHeaders)
+			return ErrTableHeaders
 		}
 	}
 
