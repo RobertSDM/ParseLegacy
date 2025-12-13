@@ -10,12 +10,12 @@ import (
 )
 
 var (
-	ErrInitApp      string = "erro ao iniciar o app"
-	ErrTableShape          = "as tabela precisam ter a mesma largura"
-	ErrTableHeaders        = "as tabela precisam ter as mesma headers"
-	ErrNotFound            = "%s não foi encontrado(a)"
-	ErrDirectory           = "você precisa selecionar uma pasta"
-	ErrSave                = "erro ao salvar"
+	ErrInitApp      = "erro ao iniciar o app"
+	ErrTableShape   = "as tabela precisam ter a mesma largura"
+	ErrTableHeaders = "as tabela precisam ter as mesma headers"
+	ErrNotFound     = "%s não foi encontrado(a)"
+	ErrDirectory    = "você precisa selecionar uma pasta"
+	ErrSave         = "erro ao salvar"
 )
 
 const ColumnLineNumber = 5
@@ -45,6 +45,14 @@ var HeadersAlignment = []string{
 	"left",
 	"left",
 }
+
+type STATE int
+
+const (
+	RUNNING STATE = iota
+	PAUSED
+	ENDED
+)
 
 // Verify if a page is the last page
 func IsLastPage(pageLines []string) bool {

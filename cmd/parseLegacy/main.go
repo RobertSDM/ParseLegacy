@@ -14,13 +14,28 @@ import (
 	"github.com/sqweek/dialog"
 )
 
+var appState parseLegacy.STATE
+
 func main() {
 	table := parseLegacy.NewTable(parseLegacy.Headers)
+	appState = parseLegacy.RUNNING
 
-	isRunning := true
 	strNowDate := time.Now().Format("02-01-2006")
 
-	err := winkb.ListenKeys([]string{"VK_ESCAPE"}, func(k string) { isRunning = false })
+	err := winkb.ListenKeys([]string{"VK_ESCAPE", "VK_F12"}, func(k string) {
+		switch k {
+		case "VK_ESCAPE":
+			appState = parseLegacy.ENDED
+		case "VK_F12":
+			switch appState {
+			case parseLegacy.RUNNING:
+				appState = parseLegacy.PAUSED
+			case parseLegacy.PAUSED:
+				appState = parseLegacy.RUNNING
+			}
+
+		}
+	})
 	if err != nil {
 		dialog.Message("%s", parseLegacy.ErrInitApp).Title("Erro :(").Error()
 		panic(err)
@@ -35,12 +50,16 @@ func main() {
 	// Wait time to select the screen
 	time.Sleep(2 * time.Second)
 
-	for isRunning {
+	for appState != parseLegacy.ENDED {
+		if appState == parseLegacy.PAUSED {
+			continue
+		}
+
 		page := parseLegacy.GetPage()
 		lines := strings.Split(page, "\n")
 
 		if parseLegacy.IsLastPage(lines) {
-			isRunning = false
+			appState = parseLegacy.ENDED
 			continue
 		}
 
