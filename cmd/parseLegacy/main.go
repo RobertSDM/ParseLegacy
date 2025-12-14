@@ -20,7 +20,7 @@ func main() {
 	isRunning := true
 	strNowDate := time.Now().Format("02-01-2006")
 
-	err := winkb.ListenKeys([]string{"VK_ESCAPE"}, func(k string) { isRunning = false })
+	err := winkb.ListenKeys([]winkb.VK_CODE{winkb.VK_ESCAPE}, func(k string) { isRunning = false })
 	if err != nil {
 		dialog.Message("%s", parseLegacy.ErrInitApp).Title("Erro :(").Error()
 		panic(err)

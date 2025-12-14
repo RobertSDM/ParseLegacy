@@ -12,12 +12,14 @@ const (
 	KEYBOARD_UP_EVENT   = 0x0002
 )
 
+type VK_CODE int
+
 const (
-	VK_A       = 0x41
-	VK_C       = 0x43
-	VK_CONTROL = 0x11 // CTRL
-	VK_F8      = 0x77
-	VK_ESCAPE  = 0x1B // ESC
+	VK_A       VK_CODE = 0x41
+	VK_C       VK_CODE = 0x43
+	VK_CONTROL VK_CODE = 0x11 // CTRL
+	VK_F8      VK_CODE = 0x77
+	VK_ESCAPE  VK_CODE = 0x1B // ESC
 )
 
 // Represent the keyboard input send to the Windows API
@@ -67,18 +69,18 @@ func sendInput(inputLength uint, inputs []INPUT) (uint32, error) {
 }
 
 // Presses a key
-func KeyPress(key uint16) (err error) {
+func KeyPress(key VK_CODE) (err error) {
 	inputs := []INPUT{
 		{
 			Type: KEYBOARD_INPUT_TYPE,
 			Ki: KEYBDINPUT{ // without dwFlags correspond to the down event
-				WVk: key,
+				WVk: uint16(key),
 			},
 		},
 		{
 			Type: KEYBOARD_INPUT_TYPE,
 			Ki: KEYBDINPUT{
-				WVk:     key,
+				WVk:     uint16(key),
 				DwFlags: uint32(KEYBOARD_UP_EVENT),
 			},
 		},
@@ -90,11 +92,11 @@ func KeyPress(key uint16) (err error) {
 }
 
 // Press and hold a key while executing a callback
-func KeyHold(key uint16, cb func()) (err error) {
+func KeyHold(key VK_CODE, cb func()) (err error) {
 	_, err = sendInput(1, []INPUT{{
 		Type: KEYBOARD_INPUT_TYPE,
 		Ki: KEYBDINPUT{
-			WVk: key,
+			WVk: uint16(key),
 		},
 	}})
 	if err != nil {
@@ -106,7 +108,7 @@ func KeyHold(key uint16, cb func()) (err error) {
 	_, err = sendInput(1, []INPUT{{
 		Type: KEYBOARD_INPUT_TYPE,
 		Ki: KEYBDINPUT{
-			WVk:     key,
+			WVk:     uint16(key),
 			DwFlags: uint32(KEYBOARD_UP_EVENT),
 		},
 	}})

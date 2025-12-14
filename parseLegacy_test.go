@@ -119,7 +119,7 @@ func TestE2E(t *testing.T) {
 	isRunning := "RUNNING"
 	stopped := false
 
-	err := winkb.ListenKeys([]string{"VK_ESCAPE"}, func(k string) {
+	err := winkb.ListenKeys([]winkb.VK_CODE{winkb.VK_ESCAPE}, func(k string) {
 		switch k {
 		case "VK_ESCAPE":
 			stopped = true
