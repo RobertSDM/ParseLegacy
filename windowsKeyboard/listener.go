@@ -1,9 +1,9 @@
 package windowskeyboard
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	"parseLegacy/utils"
 
@@ -44,7 +44,6 @@ func ListenKeys(keys []VK_CODE, cb func(k string)) (err error) {
 		for {
 			select {
 			case k := <-lowLevelKeychan:
-				fmt.Println(k.VKCode)
 				if k.Message.String() == "WM_KEYDOWN" && utils.SliceContains(keys, stringToVkCode(k.VKCode.String())) {
 					cb(k.VKCode.String())
 				}
@@ -54,6 +53,7 @@ func ListenKeys(keys []VK_CODE, cb func(k string)) (err error) {
 			}
 		}
 	}()
+	time.Sleep(10 * time.Millisecond)
 
 	return nil
 }

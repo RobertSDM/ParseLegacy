@@ -12,7 +12,6 @@ func TestListener(t *testing.T) {
 		presschan <- 1
 	})
 
-	time.Sleep(10 * time.Millisecond)
 	KeyPress(VK_ESCAPE)
 
 	select {
