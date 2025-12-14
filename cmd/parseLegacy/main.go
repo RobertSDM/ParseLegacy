@@ -49,10 +49,10 @@ func main() {
 			lines[j] = " " + strings.ReplaceAll(lines[j], "\r", "") + " "
 		}
 
-		strTableRows := parseLegacy.GetTable(lines)
+		strTableRows := parseLegacy.GetTableRange(lines)
 
-		columnsNamesLine := lines[parseLegacy.ColumnLineNumber]
-		columsNamesPositions := parseLegacy.ColumnsPosition(columnsNamesLine)
+		columnsNamesLine := lines[parseLegacy.HeaderLineIndex]
+		columsNamesPositions := parseLegacy.HeadersPositions(columnsNamesLine)
 
 		tb := parseLegacy.ParseTable(strTableRows, columsNamesPositions)
 

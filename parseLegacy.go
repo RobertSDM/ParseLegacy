@@ -1,6 +1,7 @@
 package parseLegacy
 
 import (
+	"errors"
 	"strings"
 	"time"
 
@@ -9,16 +10,26 @@ import (
 	"github.com/atotto/clipboard"
 )
 
+// Shown to the user errors
+
 var (
-	ErrInitApp      string = "erro ao iniciar o app"
-	ErrTableShape          = "as tabela precisam ter a mesma largura"
-	ErrTableHeaders        = "as tabela precisam ter as mesma headers"
-	ErrNotFound            = "%s não foi encontrado(a)"
-	ErrDirectory           = "você precisa selecionar uma pasta"
-	ErrSave                = "erro ao salvar"
+	ErrInitApp        = errors.New("erro ao iniciar o app")
+	ErrFolderNotFound = errors.New("a pasta não foi foi encontrado(a)")
+	ErrDirectory      = errors.New("você precisa selecionar uma pasta")
+	ErrSave           = errors.New("erro ao salvar")
 )
 
-const ColumnLineNumber = 5
+// Not shown to the user errors
+
+var (
+	ErrEmptyRow        = errors.New("cannot add empty rows")
+	ErrTableShape      = errors.New("the tables need to have the same height")
+	ErrTableHeaders    = errors.New("the tables need to have the same headers")
+	ErrEmptyTable      = errors.New("cannot concat a empty table")
+	ErrSameTableConcat = errors.New("cannot concat the same table")
+)
+
+const HeaderLineIndex = 5
 
 var ColumnsToDrop = []string{"Usuario", "Data"}
 
@@ -48,7 +59,12 @@ var HeadersAlignment = []string{
 
 // Verify if a page is the last page
 func IsLastPage(pageLines []string) bool {
-	return strings.Contains(pageLines[len(pageLines)-3], "ULTIMA TELA")
+	for i := len(pageLines) - 1; i >= 0; i-- {
+		if strings.Contains(pageLines[i], "ULTIMA TELA") {
+			return true
+		}
+	}
+	return false
 }
 
 // Return the legacy screen as text
@@ -67,7 +83,7 @@ func GetPage() string {
 }
 
 // Get the table contained in a slice of lines
-func GetTable(lines []string) []string {
+func GetTableRange(lines []string) []string {
 	tableStart := -1
 	tableEnd := -1
 
@@ -89,7 +105,7 @@ func GetTable(lines []string) []string {
 }
 
 // Get the position that best fits the columns title alignment
-func ColumnsPosition(colLine string) map[string]int {
+func HeadersPositions(colLine string) map[string]int {
 	positions := map[string]int{}
 	coli := 0
 
