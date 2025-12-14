@@ -57,6 +57,14 @@ var HeadersAlignment = []string{
 	"left",
 }
 
+type STATE int
+
+const (
+	RUNNING STATE = iota
+	PAUSED
+	TERMINATED
+)
+
 // Verify if a page is the last page
 func IsLastPage(pageLines []string) bool {
 	for i := len(pageLines) - 1; i >= 0; i-- {

@@ -116,13 +116,21 @@ func TestE2E(t *testing.T) {
 	table := NewTable(Headers)
 	lineCount := 0
 
-	isRunning := "RUNNING"
+	appState := RUNNING
 	stopped := false
+	pausedRounds := 0
 
-	err := winkb.ListenKeys([]winkb.VK_CODE{winkb.VK_ESCAPE}, func(k string) {
+	err := winkb.ListenKeys([]winkb.VK_CODE{winkb.VK_ESCAPE, winkb.VK_F12}, func(k string) {
 		switch k {
 		case "VK_ESCAPE":
 			stopped = true
+		case "VK_F12":
+			switch appState {
+			case RUNNING:
+				appState = PAUSED
+			case PAUSED:
+				appState = RUNNING
+			}
 		}
 	})
 	if err != nil {
@@ -132,12 +140,20 @@ func TestE2E(t *testing.T) {
 
 	i := 0
 
-	for isRunning != "TERMINATED" {
+	for appState != TERMINATED {
+		if appState == PAUSED {
+			pausedRounds++
+			if pausedRounds == 3 {
+				winkb.KeyPress(winkb.VK_F12)
+			}
+			continue
+		}
+
 		page := testdata.Pages[i]
 		lines := strings.Split(page, "\n")
 
 		if IsLastPage(lines) {
-			isRunning = "TERMINATED"
+			appState = TERMINATED
 			continue
 		}
 
@@ -146,6 +162,10 @@ func TestE2E(t *testing.T) {
 
 		if i%3 == 0 {
 			winkb.KeyPress(winkb.VK_ESCAPE)
+		}
+
+		if pausedRounds == 0 {
+			winkb.KeyPress(winkb.VK_F12)
 		}
 
 		headerLine := lines[HeaderLineIndex]
@@ -157,9 +177,16 @@ func TestE2E(t *testing.T) {
 
 		i++
 	}
+	if table.Height != lineCount {
+		t.Fatal("Not reading all lines")
+	}
 
 	if !stopped {
 		t.Fatal("The stop event was not detected")
+	}
+
+	if pausedRounds != 3 {
+		t.Fatal("Pause not working")
 	}
 
 	savePath := filepath.Join(t.TempDir(), "testTableSave.xlsx")

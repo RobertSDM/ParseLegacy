@@ -21,6 +21,8 @@ func stringToVkCode(key string) VK_CODE {
 		return VK_CONTROL
 	case "VK_F8":
 		return VK_F8
+	case "VK_F12":
+		return VK_F12
 	case "VK_ESCAPE":
 		return VK_ESCAPE
 	}

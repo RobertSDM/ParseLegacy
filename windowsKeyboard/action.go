@@ -20,6 +20,7 @@ const (
 	VK_CONTROL VK_CODE = 0x11 // CTRL
 	VK_F8      VK_CODE = 0x77
 	VK_ESCAPE  VK_CODE = 0x1B // ESC
+	VK_F12     VK_CODE = 0x7B
 )
 
 // Represent the keyboard input send to the Windows API
