@@ -36,6 +36,7 @@ func main() {
 
 		}
 	})
+
 	if err != nil {
 		dialog.Message("%s", parseLegacy.ErrInitApp).Title("Erro :(").Error()
 		panic(err)
