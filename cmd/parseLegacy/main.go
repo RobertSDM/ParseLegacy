@@ -22,10 +22,10 @@ func main() {
 
 	strNowDate := time.Now().Format("02-01-2006")
 
-	err := winkb.ListenKeys([]string{"VK_ESCAPE", "VK_F12"}, func(k string) {
+	err := winkb.ListenKeys([]winkb.VK_CODE{winkb.VK_ESCAPE, winkb.VK_F12}, func(k string) {
 		switch k {
 		case "VK_ESCAPE":
-			appState = parseLegacy.ENDED
+			appState = parseLegacy.TERMINATED
 		case "VK_F12":
 			switch appState {
 			case parseLegacy.RUNNING:
@@ -50,7 +50,7 @@ func main() {
 	// Wait time to select the screen
 	time.Sleep(2 * time.Second)
 
-	for appState != parseLegacy.ENDED {
+	for appState != parseLegacy.TERMINATED {
 		if appState == parseLegacy.PAUSED {
 			continue
 		}
@@ -59,7 +59,7 @@ func main() {
 		lines := strings.Split(page, "\n")
 
 		if parseLegacy.IsLastPage(lines) {
-			appState = parseLegacy.ENDED
+			appState = parseLegacy.TERMINATED
 			continue
 		}
 

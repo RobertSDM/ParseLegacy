@@ -62,7 +62,7 @@ type STATE int
 const (
 	RUNNING STATE = iota
 	PAUSED
-	ENDED
+	TERMINATED
 )
 
 // Verify if a page is the last page
