@@ -4,6 +4,7 @@ import (
 	"runtime"
 	"unsafe"
 
+	"github.com/moutend/go-hook/pkg/types"
 	"golang.org/x/sys/windows"
 )
 
@@ -21,6 +22,10 @@ const (
 	VK_F8      VK_CODE = 0x77
 	VK_ESCAPE  VK_CODE = 0x1B // ESC
 	VK_F12     VK_CODE = 0x7B
+	VK_SHIFT   VK_CODE = 0xA0
+	VK_HOME    VK_CODE = 0x24
+	VK_UP      VK_CODE = 0x26
+	VK_LEFT    VK_CODE = 0x25
 )
 
 // Represent the keyboard input send to the Windows API
@@ -70,7 +75,7 @@ func sendInput(inputLength uint, inputs []INPUT) (uint32, error) {
 }
 
 // Presses a key
-func KeyPress(key VK_CODE) (err error) {
+func KeyPress(key types.VKCode) (err error) {
 	inputs := []INPUT{
 		{
 			Type: KEYBOARD_INPUT_TYPE,
@@ -93,7 +98,7 @@ func KeyPress(key VK_CODE) (err error) {
 }
 
 // Press and hold a key while executing a callback
-func KeyHold(key VK_CODE, cb func()) (err error) {
+func KeyHold(key types.VKCode, cb func()) (err error) {
 	_, err = sendInput(1, []INPUT{{
 		Type: KEYBOARD_INPUT_TYPE,
 		Ki: KEYBDINPUT{

@@ -3,16 +3,18 @@ package windowskeyboard
 import (
 	"testing"
 	"time"
+
+	"github.com/moutend/go-hook/pkg/types"
 )
 
 func TestListener(t *testing.T) {
 	presschan := make(chan int8)
 
-	ListenKeys([]VK_CODE{VK_ESCAPE}, func(k string) {
+	ListenKeys([]types.VKCode{types.VK_ESCAPE}, func(k string) {
 		presschan <- 1
 	})
 
-	KeyPress(VK_ESCAPE)
+	KeyPress(types.VK_ESCAPE)
 
 	select {
 	case <-presschan:

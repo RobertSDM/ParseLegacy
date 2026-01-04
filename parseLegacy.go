@@ -8,6 +8,7 @@ import (
 	winkb "parseLegacy/windowsKeyboard"
 
 	"github.com/atotto/clipboard"
+	"github.com/moutend/go-hook/pkg/types"
 )
 
 // Shown to the user errors
@@ -75,13 +76,23 @@ func IsLastPage(pageLines []string) bool {
 	return false
 }
 
+// Sequence to select the text from the terminal
+func copyTeminal() {
+	winkb.KeyHold(types.VK_SHIFT, func() {
+		winkb.KeyPress(types.VK_HOME)
+	})
+	winkb.KeyHold(types.VK_SHIFT, func() {
+		winkb.KeyPress(types.VK_UP)
+		winkb.KeyPress(types.VK_LEFT)
+	})
+}
+
 // Return the legacy screen as text
 func GetPage() string {
-	winkb.KeyHold(winkb.VK_CONTROL, func() {
-		winkb.KeyPress(winkb.VK_A)
-	})
-	winkb.KeyHold(winkb.VK_CONTROL, func() {
-		winkb.KeyPress(winkb.VK_C)
+	copyTeminal()
+
+	winkb.KeyHold(types.VK_CONTROL, func() {
+		winkb.KeyPress(types.VK_C)
 	})
 
 	time.Sleep(20 * time.Millisecond)

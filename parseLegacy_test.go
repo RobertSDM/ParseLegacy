@@ -9,6 +9,7 @@ import (
 
 	winkb "parseLegacy/windowsKeyboard"
 
+	"github.com/moutend/go-hook/pkg/types"
 	"github.com/sqweek/dialog"
 )
 
@@ -120,7 +121,7 @@ func TestE2E(t *testing.T) {
 	stopped := false
 	pausedRounds := 0
 
-	err := winkb.ListenKeys([]winkb.VK_CODE{winkb.VK_ESCAPE, winkb.VK_F12}, func(k string) {
+	err := winkb.ListenKeys([]types.VKCode{types.VK_ESCAPE, types.VK_F12}, func(k string) {
 		switch k {
 		case "VK_ESCAPE":
 			stopped = true
@@ -144,7 +145,7 @@ func TestE2E(t *testing.T) {
 		if appState == PAUSED {
 			pausedRounds++
 			if pausedRounds == 3 {
-				winkb.KeyPress(winkb.VK_F12)
+				winkb.KeyPress(types.VK_F12)
 			}
 			continue
 		}
@@ -161,11 +162,11 @@ func TestE2E(t *testing.T) {
 		lineCount += len(tableRange)
 
 		if i%3 == 0 {
-			winkb.KeyPress(winkb.VK_ESCAPE)
+			winkb.KeyPress(types.VK_ESCAPE)
 		}
 
 		if pausedRounds == 0 {
-			winkb.KeyPress(winkb.VK_F12)
+			winkb.KeyPress(types.VK_F12)
 		}
 
 		headerLine := lines[HeaderLineIndex]

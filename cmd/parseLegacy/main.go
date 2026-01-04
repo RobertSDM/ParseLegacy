@@ -11,6 +11,7 @@ import (
 
 	winkb "parseLegacy/windowsKeyboard"
 
+	"github.com/moutend/go-hook/pkg/types"
 	"github.com/sqweek/dialog"
 )
 
@@ -22,7 +23,7 @@ func main() {
 
 	strNowDate := time.Now().Format("02-01-2006")
 
-	err := winkb.ListenKeys([]winkb.VK_CODE{winkb.VK_ESCAPE, winkb.VK_F12}, func(k string) {
+	err := winkb.ListenKeys([]types.VKCode{types.VK_ESCAPE, types.VK_F12}, func(k string) {
 		switch k {
 		case "VK_ESCAPE":
 			appState = parseLegacy.TERMINATED
@@ -36,7 +37,6 @@ func main() {
 
 		}
 	})
-
 	if err != nil {
 		dialog.Message("%s", parseLegacy.ErrInitApp).Title("Erro :(").Error()
 		panic(err)
@@ -79,7 +79,7 @@ func main() {
 		table.ConcatTable(tb)
 
 		// GO to the next page
-		winkb.KeyPress(winkb.VK_F8)
+		winkb.KeyPress(types.VK_F8)
 		time.Sleep(200 * time.Millisecond)
 	}
 
