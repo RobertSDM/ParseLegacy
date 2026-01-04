@@ -2,6 +2,7 @@ name: "Application Test"
 
 on:
     push:
+        branches: [main]
 
 jobs:
     test:
