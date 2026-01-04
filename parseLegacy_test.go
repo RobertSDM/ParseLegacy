@@ -3,12 +3,14 @@ package parseLegacy
 import (
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"parseLegacy/testdata"
 
 	winkb "parseLegacy/windowsKeyboard"
 
+	"github.com/moutend/go-hook/pkg/keyboard"
 	"github.com/moutend/go-hook/pkg/types"
 	"github.com/sqweek/dialog"
 )
@@ -109,6 +111,31 @@ func TestParseTable(t *testing.T) {
 	}
 }
 
+func TestCopyTerminal(t *testing.T) {
+	var wg sync.WaitGroup
+
+	orderedCodes := []types.VKCode{types.VK_HOME, types.VK_UP, types.VK_LEFT}
+	i := 0
+
+	wg.Add(1)
+	winkb.ListenKeys(orderedCodes, func(k types.VKCode) {
+		if k != orderedCodes[i] {
+			t.Fatalf("Wrong sequence to copy. Expected %s and received %s", k.String(), orderedCodes[i].String())
+		}
+
+		i++
+
+		if i == len(orderedCodes) {
+			wg.Done()
+		}
+	})
+	defer keyboard.Uninstall()
+
+	copyTeminal()
+
+	wg.Wait()
+}
+
 // E2E Test
 
 func TestE2E(t *testing.T) {
@@ -121,8 +148,8 @@ func TestE2E(t *testing.T) {
 	stopped := false
 	pausedRounds := 0
 
-	err := winkb.ListenKeys([]types.VKCode{types.VK_ESCAPE, types.VK_F12}, func(k string) {
-		switch k {
+	err := winkb.ListenKeys([]types.VKCode{types.VK_ESCAPE, types.VK_F12}, func(k types.VKCode) {
+		switch k.String() {
 		case "VK_ESCAPE":
 			stopped = true
 		case "VK_F12":

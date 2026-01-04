@@ -11,6 +11,7 @@ import (
 
 	winkb "parseLegacy/windowsKeyboard"
 
+	"github.com/moutend/go-hook/pkg/keyboard"
 	"github.com/moutend/go-hook/pkg/types"
 	"github.com/sqweek/dialog"
 )
@@ -23,8 +24,8 @@ func main() {
 
 	strNowDate := time.Now().Format("02-01-2006")
 
-	err := winkb.ListenKeys([]types.VKCode{types.VK_ESCAPE, types.VK_F12}, func(k string) {
-		switch k {
+	err := winkb.ListenKeys([]types.VKCode{types.VK_ESCAPE, types.VK_F12}, func(k types.VKCode) {
+		switch k.String() {
 		case "VK_ESCAPE":
 			appState = parseLegacy.TERMINATED
 		case "VK_F12":
@@ -41,6 +42,7 @@ func main() {
 		dialog.Message("%s", parseLegacy.ErrInitApp).Title("Erro :(").Error()
 		panic(err)
 	}
+	defer keyboard.Uninstall()
 
 	outDir, err := dialog.Directory().Title("Local para salvar o relatório").Browse()
 	if err != nil {

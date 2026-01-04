@@ -78,7 +78,7 @@ func IsLastPage(pageLines []string) bool {
 
 // Sequence to select the text from the terminal
 func copyTeminal() {
-	winkb.KeyHold(types.VK_SHIFT, func() {
+	winkb.KeyHold(types.VK_CONTROL, func() {
 		winkb.KeyPress(types.VK_HOME)
 	})
 	winkb.KeyHold(types.VK_SHIFT, func() {

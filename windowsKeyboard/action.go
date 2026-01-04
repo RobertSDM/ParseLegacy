@@ -13,21 +13,6 @@ const (
 	KEYBOARD_UP_EVENT   = 0x0002
 )
 
-type VK_CODE int
-
-const (
-	VK_A       VK_CODE = 0x41
-	VK_C       VK_CODE = 0x43
-	VK_CONTROL VK_CODE = 0x11 // CTRL
-	VK_F8      VK_CODE = 0x77
-	VK_ESCAPE  VK_CODE = 0x1B // ESC
-	VK_F12     VK_CODE = 0x7B
-	VK_SHIFT   VK_CODE = 0xA0
-	VK_HOME    VK_CODE = 0x24
-	VK_UP      VK_CODE = 0x26
-	VK_LEFT    VK_CODE = 0x25
-)
-
 // Represent the keyboard input send to the Windows API
 type KEYBDINPUT struct {
 	// Windows Virtual Key

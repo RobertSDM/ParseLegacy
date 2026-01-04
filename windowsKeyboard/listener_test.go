@@ -10,7 +10,7 @@ import (
 func TestListener(t *testing.T) {
 	presschan := make(chan int8)
 
-	ListenKeys([]types.VKCode{types.VK_ESCAPE}, func(k string) {
+	ListenKeys([]types.VKCode{types.VK_ESCAPE}, func(_ types.VKCode) {
 		presschan <- 1
 	})
 
