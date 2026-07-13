@@ -70,22 +70,4 @@ The data is then saved in disk at a specified path, as a .xlsx
 
 ## Why GO
 
-The first idea that came into my mind was to use python language.
-I was going to deal with tabulated data and the `pandas` library seemed to be just right.
-
-Developing the project in python was straightforward.
-The problem really showed up when creating the executables.
-The program had to be build specifically for a windows 7 with x86 and x64 as architectures,
-and I wanted the build to be generated and published as a release with a Github's Action.
-
-I wasn't being able to create the x86 builds using the `pyinstaller` library.
-I keeped getting errors building for x86, and I needed to downgrade the python version to one that still supported windows 7,
-then had dependency errors. It was being more complicated then it really needed to be.
-
-The main problem was to build for x86 architecture,
-which pyinstaller does, but only if executed in a x86 environment.
-The solution was to change the programming language to one where the build compilation would be easier.
-
-Golang was my choice, because it can compile to x86 and other architectures by just changing a environment variable.
-It was very easy to integrate in a Github's Action. After deciding the language to use I had to update the code to use GO 1.20 version and adjust some dependencies
-and start to call the Windows API.
+I needed to run this project on a Windows 7 86x, and GO with its capability of creating .exe files from different environments it was running on, using only environment variables, was chosen. I tried with Python, but the .exe creation with pyinstaller was a unecessary burden. I opted by the fast and simple.
